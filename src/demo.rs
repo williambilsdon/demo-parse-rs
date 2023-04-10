@@ -1,29 +1,31 @@
 use std::fs;
-use std::slice::Iter;
 use std::vec::IntoIter;
 
 struct Demo {
     header: String,
-    demo_protocol: u32,
-    network_protocol: u32,
+    demo_protocol: i32,
+    network_protocol: i32,
     server_name: String,
     client_name: String,
     map_name: String,
     game_directory: String,
     playback_time: f32,
-    ticks: u32,
-    frames: u32,
-    sign_on_length: u32
+    ticks: i32,
+    frames: i32,
+    sign_on_length: i32
 }
 
 // TODO: All unwraps need proper handling.
 impl Demo {
     pub fn parse(file_name: &str) {
+        let example = fs::read(file_name).unwrap();
+
         let mut demo_bytes = fs::read(file_name).unwrap().into_iter();
+
         let header = Demo::parse_string(&mut demo_bytes, 8);
         println!("{}", header);
         
-        let demo_protocol = Demo::parse_u32(&mut demo_bytes);
+        let demo_protocol = Demo::parse_i32(&mut demo_bytes);
         println!("{}", demo_protocol);
     }
 
@@ -37,14 +39,20 @@ impl Demo {
         String::from_utf8(header_bytes).unwrap()
     }
 
-    fn parse_u32(bytes: &mut IntoIter<u8>) -> u32 {
+    fn parse_i32(bytes: &mut IntoIter<u8>) -> i32 {
         let mut int32_bytes = vec![];
 
         for _ in 0..4 {
             int32_bytes.push(bytes.next().unwrap());
         }
-        // FIXME:  There's some bug here causing a crash, I believe it's to do with the ints being stores as Little Endian.
-        str::parse::<u32>(&String::from_utf8(int32_bytes).unwrap()).unwrap()
+
+        let as_utf8 = String::from_utf8(int32_bytes).unwrap();
+
+        println!("converted int as string: {}", as_utf8);
+
+        // FIXME:  There needs to be a betterway to handle integers in decimal byte format.
+        // This approach of expecting 4 bytes can quickly fail.
+       as_utf8.trim_end().parse().unwrap()
     }
 }
 
@@ -52,12 +60,19 @@ impl Demo {
 mod tests {
     use super::*;
 
-    // TODO: These UTs should test each individual parse method
+    #[test]
+    fn parse_string() {
+        let mut input: IntoIter<u8> = vec![72, 101, 108, 108, 111, 44, 32, 87, 111, 114, 108, 100, 33].into_iter();
+        let result = Demo::parse_string(&mut input, 13);
+
+        assert_eq!(result, "Hello, World!");
+    }
 
     #[test]
-    fn test_parse() {
-        let result = Demo::parse("test_demo.dem");
+    fn parse_i32() {
+        let mut input: IntoIter<u8>= vec![49, 48, 48].into_iter();
+        let result = Demo::parse_i32(&mut input);
 
-        assert_eq!(result, ())
+        assert_eq!(result, 100)
     }
 }
