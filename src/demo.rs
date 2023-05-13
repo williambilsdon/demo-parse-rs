@@ -1,5 +1,5 @@
 use std::fs;
-use std::str;
+use bitreader_rs::Bitreader;
 
 struct Demo {
     header: String,
@@ -20,8 +20,11 @@ impl Demo {
     pub fn parse(file_name: &str) {
         let file = fs::read(file_name).unwrap();
         
-        // let demo_protocol = Demo::parse_i32(&mut demo_bytes_iter);
-        // println!("{}", demo_protocol);
+        let mut bitreader = Bitreader::new(file.as_slice());
+        
+        let demo_header = bitreader.read_string(8).unwrap();
+        println!("{}", demo_header)
+
     }
 }
 
