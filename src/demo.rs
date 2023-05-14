@@ -16,9 +16,9 @@ struct Demo {
     sign_on_length: i32
 }
 
-// TODO: All ?s need proper handling.
 impl Demo {
     pub fn parse(file_name: &str) -> Result<Demo, BitreadError> {
+        // TODO: move file read out of this impl
         let file = fs::read(file_name).unwrap();
         let mut bitreader = Bitreader::new(file.as_slice());
 
