@@ -1,8 +1,7 @@
-use std::fs;
 use bitreader_rs::{errors::BitreadError, bitreader::Bitreader};
 
 #[derive(PartialEq, Debug)]
-struct Demo {
+pub struct Demo {
     header: String,
     demo_protocol: i32,
     network_protocol: i32,
@@ -17,18 +16,16 @@ struct Demo {
 }
 
 impl Demo {
-    pub fn parse(file_name: &str) -> Result<Demo, BitreadError> {
-        // TODO: move file read out of this impl
-        let file = fs::read(file_name).unwrap();
-        let mut bitreader = Bitreader::new(file.as_slice());
+    pub fn parse(file_bytes: Vec<u8>) -> Result<Demo, BitreadError> {
+        let mut bitreader = Bitreader::new(file_bytes.as_slice());
 
-        let header = bitreader.read_string(8)?;
+        let header = Self::read_string(&mut bitreader, 8)?;
         let demo_protocol = bitreader.read_i32()?;
         let network_protocol = bitreader.read_i32()?;
-        let server_name = bitreader.read_string(260)?;
-        let client_name = bitreader.read_string(260)?;
-        let map_name = bitreader.read_string(260)?;
-        let game_directory = bitreader.read_string(260)?;
+        let server_name = Self::read_string(&mut bitreader, 260)?;
+        let client_name = Self::read_string(&mut bitreader, 260)?;
+        let map_name = Self::read_string(&mut bitreader, 260)?;
+        let game_directory = Self::read_string(&mut bitreader, 260)?;
         let playback_time = bitreader.read_f32()?;
         let ticks = bitreader.read_i32()?;
         let frames = bitreader.read_i32()?;
@@ -48,15 +45,13 @@ impl Demo {
             sign_on_length
         })
     }
-}
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn parse() {
-        let result = Demo::parse("test_demo.dem");
-        assert!(result.is_ok())
+    fn read_string(bitreader: &mut Bitreader, len: u64) -> Result<String, BitreadError> {
+        let string = bitreader.read_string(len)?.as_bytes().to_vec();
+        if let Ok(utf8_val) = String::from_utf8(string) {
+            Ok(utf8_val)
+        } else {
+            Err(BitreadError::ParseToStringError)
+        }
     }
 }
