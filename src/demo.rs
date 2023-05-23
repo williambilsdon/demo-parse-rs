@@ -47,11 +47,7 @@ impl Demo {
     }
 
     fn read_string(bitreader: &mut Bitreader, len: u64) -> Result<String, BitreadError> {
-        let string = bitreader.read_string(len)?.as_bytes().to_vec();
-        if let Ok(utf8_val) = String::from_utf8(string) {
-            Ok(utf8_val)
-        } else {
-            Err(BitreadError::ParseToStringError)
-        }
+        let string = bitreader.read_string(len)?;
+        Ok(String::from(string.trim_matches('\0')))
     }
 }
