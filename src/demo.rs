@@ -16,22 +16,20 @@ pub struct Demo {
 }
 
 impl Demo {
-    pub fn parse(file_bytes: Vec<u8>) -> Result<Demo, BitreadError> {
-        let mut bitreader = Bitreader::new(file_bytes.as_slice());
-
-        let header = Self::read_string(&mut bitreader, 8)?;
+    pub fn parse(bitreader: &mut Bitreader) -> Result<Demo, BitreadError> {
+        let header = Self::read_string(bitreader, 8)?;
         let demo_protocol = bitreader.read_i32()?;
         let network_protocol = bitreader.read_i32()?;
-        let server_name = Self::read_string(&mut bitreader, 260)?;
-        let client_name = Self::read_string(&mut bitreader, 260)?;
-        let map_name = Self::read_string(&mut bitreader, 260)?;
-        let game_directory = Self::read_string(&mut bitreader, 260)?;
+        let server_name = Self::read_string(bitreader, 260)?;
+        let client_name = Self::read_string(bitreader, 260)?;
+        let map_name = Self::read_string(bitreader, 260)?;
+        let game_directory = Self::read_string(bitreader, 260)?;
         let playback_time = bitreader.read_f32()?;
         let ticks = bitreader.read_i32()?;
         let frames = bitreader.read_i32()?;
         let sign_on_length = bitreader.read_i32()?;  
 
-        Ok(Demo { 
+        Ok(Demo {
             header, 
             demo_protocol, 
             network_protocol, 
