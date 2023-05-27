@@ -19,12 +19,14 @@ fn main() {
         process::exit(1)
     });
 
-    let mut bitreader = Bitreader::new(file.as_slice());
+    let bitreader = Bitreader::new(file.as_slice());
 
-    let demo_header = Demo::parse(&mut bitreader).unwrap_or_else(|err| {
+    let mut demo = Demo::new(bitreader);
+    
+    demo.parse_header().unwrap_or_else(|err| {
         eprintln!("Error parsing demo header: {}", err);
         process::exit(1)
     });
 
-    println!("{:?}", demo_header);
+    println!("{:?}", demo.header);
 }

@@ -1,7 +1,46 @@
 use bitreader_rs::{errors::BitreadError, bitreader::Bitreader};
 
-#[derive(PartialEq, Debug)]
-pub struct Demo {
+pub struct Demo<'a> {
+    bitreader: Bitreader<'a>,
+    pub header: Header,
+    frames: Vec<Frame>
+}
+
+impl<'a> Demo<'a> {
+    pub fn new(bitreader: Bitreader<'a>) -> Demo<'a> {
+        Demo { 
+            bitreader, 
+            header: Header::default(), 
+            frames: vec![]
+        }
+    }
+
+    pub fn parse_header(&mut self) -> Result<(), BitreadError> {
+        self.header = Header {
+            header: self.read_string(8)?,
+            demo_protocol: self.bitreader.read_i32()?,
+            network_protocol: self.bitreader.read_i32()?,
+            server_name: self.read_string(260)?,
+            client_name: self.read_string(260)?,
+            map_name: self.read_string(260)?,
+            game_directory: self.read_string(260)?,
+            playback_time: self.bitreader.read_f32()?,
+            ticks: self.bitreader.read_i32()?,
+            frames: self.bitreader.read_i32()?,
+            sign_on_length: self.bitreader.read_i32()?,
+        };
+
+        Ok(())
+    }
+
+    fn read_string(&mut self, len: u64) -> Result<String, BitreadError> {
+        let string = self.bitreader.read_string(len)?;
+        Ok(String::from(string.trim_matches('\0')))
+    }
+}
+
+#[derive(Default, Debug)]
+pub struct Header{
     header: String,
     demo_protocol: i32,
     network_protocol: i32,
@@ -15,37 +54,10 @@ pub struct Demo {
     sign_on_length: i32
 }
 
-impl Demo {
-    pub fn parse(bitreader: &mut Bitreader) -> Result<Demo, BitreadError> {
-        let header = Self::read_string(bitreader, 8)?;
-        let demo_protocol = bitreader.read_i32()?;
-        let network_protocol = bitreader.read_i32()?;
-        let server_name = Self::read_string(bitreader, 260)?;
-        let client_name = Self::read_string(bitreader, 260)?;
-        let map_name = Self::read_string(bitreader, 260)?;
-        let game_directory = Self::read_string(bitreader, 260)?;
-        let playback_time = bitreader.read_f32()?;
-        let ticks = bitreader.read_i32()?;
-        let frames = bitreader.read_i32()?;
-        let sign_on_length = bitreader.read_i32()?;  
+#[derive(Debug)]
+pub struct Frame {
+    // server_frame: i32,
+    // client_frame: i32,
+    // sub_packet_size: i32,
 
-        Ok(Demo {
-            header, 
-            demo_protocol, 
-            network_protocol, 
-            server_name, 
-            client_name, 
-            map_name, 
-            game_directory, 
-            playback_time,
-            ticks, 
-            frames, 
-            sign_on_length
-        })
-    }
-
-    fn read_string(bitreader: &mut Bitreader, len: u64) -> Result<String, BitreadError> {
-        let string = bitreader.read_string(len)?;
-        Ok(String::from(string.trim_matches('\0')))
-    }
 }
