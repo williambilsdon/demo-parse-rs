@@ -3,7 +3,7 @@ use bitreader_rs::{errors::BitreadError, bitreader::Bitreader};
 pub struct Demo<'a> {
     bitreader: Bitreader<'a>,
     pub header: Header,
-    frames: Vec<Frame>
+    pub frames: Vec<Frame>
 }
 
 impl<'a> Demo<'a> {
@@ -56,8 +56,18 @@ pub struct Header{
 
 #[derive(Debug)]
 pub struct Frame {
-    // server_frame: i32,
-    // client_frame: i32,
-    // sub_packet_size: i32,
+    server_frame: i32,
+    client_frame: i32,
+    sub_packet_size: i32,
+    buffer: Vec<char>,
+    packet: Packet
+}
 
+#[derive(Debug)]
+struct Packet {
+    cmd_type: char,
+    unknown: i32,
+    tick_count: i32,
+    size_of_packet: i32,
+    buffer: Vec<char>
 }
