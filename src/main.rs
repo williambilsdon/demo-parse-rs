@@ -1,7 +1,7 @@
 mod demo;
 
-use std::{fs, process, env};
 use bitreader_rs::bitreader::Bitreader;
+use std::{env, fs, process};
 
 use crate::demo::Demo;
 
@@ -22,11 +22,16 @@ fn main() {
     let bitreader = Bitreader::new(file.as_slice());
 
     let mut demo = Demo::new(bitreader);
-    
+
     demo.parse_header().unwrap_or_else(|err| {
         eprintln!("Error parsing demo header: {}", err);
         process::exit(1)
     });
 
     println!("{:?}", demo.header);
+
+    demo.parse_frames().unwrap_or_else(|err| {
+        eprintln!("Error parsing demo frames: {}", err);
+        process::exit(1)
+    });
 }
