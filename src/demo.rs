@@ -2,7 +2,7 @@ use bitreader_rs::{bitreader::Bitreader, errors::BitreadError};
 use std::io::Error;
 
 pub struct Demo<'a> {
-    bitreader: Bitreader<'a>,
+    pub bitreader: Bitreader<'a>,
     pub header: Header,
     pub frames: Vec<Frame>,
 }
@@ -45,6 +45,7 @@ impl<'a> Demo<'a> {
 
     fn parse_frame(&mut self) -> Result<Frame, BitreadError> {
         let demo_command_int = self.bitreader.read_i32()?;
+        println!("{}", self.bitreader.position);
         let demo_command = match demo_command_int {
             1 => DemoCommand::Signon,
             2 => DemoCommand::Packet,
@@ -55,7 +56,10 @@ impl<'a> Demo<'a> {
             7 => DemoCommand::DemStop,
             8 => DemoCommand::DemLastCommand,
             // TODO: Update Bitreader to support 'New' errors
-            _ => return Err(BitreadError::BufferExceeded),
+            _ => {
+                println!("no match to vals. recieved: {}", demo_command_int);
+                return Err(BitreadError::BufferExceeded)
+            },
         };
         println!("DEMO COMMAND IS : {:?}", demo_command);
         Ok(Frame::default())

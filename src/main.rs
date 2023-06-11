@@ -30,6 +30,8 @@ fn main() {
 
     println!("{:?}", demo.header);
 
+    println!("LENGTH: {}\n POSITION: {}", demo.bitreader.length, demo.bitreader.position);
+
     demo.parse_frames().unwrap_or_else(|err| {
         eprintln!("Error parsing demo frames: {}", err);
         process::exit(1)
