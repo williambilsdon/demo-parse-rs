@@ -1,2 +1,2 @@
 # demo-parse-rs
-A .dem parser for CSGO
+A .dem header parser for CSGO
